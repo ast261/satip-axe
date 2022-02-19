@@ -39,7 +39,7 @@ IPV4="dhcp"
 #
 # ntpd
 #
-NTPD_OPTS="-p 0.pool.ntp.org"
+NTPD_OPTS="-p 192.168.178.1"
 
 #
 # syslogd
