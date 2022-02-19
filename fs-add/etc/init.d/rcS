@@ -56,6 +56,9 @@ fi
 if test -r /etc/sysconfig/passwd ; then
   cp /etc/sysconfig/passwd /etc/passwd
 fi
+if ! test -r /etc/sysconfig/localtime ; then
+  cp /etc/localtime /etc/sysconfig/localtime
+fi
 
 # load config
 test -r /etc/sysconfig/config && . /etc/sysconfig/config
