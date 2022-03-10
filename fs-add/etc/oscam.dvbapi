@@ -1,0 +1,35 @@
+#
+# dvbapi configuration
+#
+# format:
+#
+#  priority:
+#   P: CAID[:][provider ID][:][service ID][:][ECM PID] [continue]
+#
+#  ignore:
+#   I: CAID[:][provider ID][:][service ID][:][ECM PID]
+#
+#  wait:
+#   D: CAID[:][provider ID][:][service ID][:][ECM PID] delay
+#
+#  map:
+#   M: CAID[:][provider ID][:][service ID][:][ECM PID] target CAID[:][target provider ID]
+#
+#  length:
+#   L: CAID[:][provider ID][:][service ID][:][ECM PID] length
+#
+
+# HD01 specific CAID settings
+P: 1830
+
+I: 1843
+I: 09C4
+I: 098C
+I: 1860
+I: 186A
+I: 098D
+I: 186D
+I: 1842
+I: 4B64
+I: 4AF4
+

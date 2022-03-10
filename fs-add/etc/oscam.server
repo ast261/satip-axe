@@ -1,0 +1,18 @@
+[reader]
+label = HD01
+protocol = mouse
+device = /dev/ttyUSB0
+caid = 1830
+boxkey = A7642F57BC96D37C
+# RSA public key modulus
+rsakey = BF358B5461863130686FC933FB541FFCED682F3680F09DBC1A23829FB3B2F766B9DD1BF3B3ECC9AD6661B753DCC3A9624156F9EB64E8168EF09E4D9C5CCA4DD5
+autospeed = 1
+group = 1
+emmcache = 1,1,2,0
+services = hdp
+
+### Optionale Parameter:
+# Manche Karten erhalten eine hohe Anzahl an globalen EMMs, die zu einem Ruckeln des Bildes führen können.
+# Diese Option blockt diese Art der EMMs.
+#blockemm-g = 1 
+

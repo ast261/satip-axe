@@ -60,7 +60,7 @@ DROPBEAR="yes"
 # minisatip
 #
 MINISATIP="yes"
-MINISATIP_OPTS=""
+MINISATIP_OPTS="--dvbapi 127.0.0.1:9000"
 
 #
 # inetd (httpd,ftpd)

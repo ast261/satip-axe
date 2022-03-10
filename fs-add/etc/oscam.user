@@ -1,0 +1,7 @@
+[account]
+user = dvbapi
+caid = 1830
+au = 1
+group = 1
+services = hdp
+

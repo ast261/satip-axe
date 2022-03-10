@@ -71,7 +71,7 @@ NANO_FILENAME=$(NANO).tar.gz
 NANO_DOWNLOAD=http://www.nano-editor.org/dist/v2.8/$(NANO_FILENAME)
 
 # 10663 10937 11234 11398 11434
-OSCAM_REV=11693
+OSCAM_REV=11704
 
 IPERF=iperf-3.1.3
 IPERF_LIB_FILES=libiperf.so libiperf.so.0 libiperf.so.0.0.0
