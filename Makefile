@@ -82,6 +82,11 @@ define GIT_CLONE
 	cd apps/$(2) && git checkout -b axe $(3)
 endef
 
+define HG_CLONE
+	@mkdir -p apps
+	hg clone $(1) apps/$(2)
+endef
+
 define WGET
 	@mkdir -p apps
 	wget -q -O $(2) $(1)
@@ -131,6 +136,7 @@ CPIO_SRCS += nano
 CPIO_SRCS += mtd-utils
 CPIO_SRCS += iperf
 CPIO_SRCS += senddsq
+CPIO_SRCS += dvb-apps
 
 fs.cpio: $(CPIO_SRCS)
 	fakeroot tools/do_min_fs.py \
@@ -159,7 +165,9 @@ fs.cpio: $(CPIO_SRCS)
 	  -e "apps/oscam-svn/Distribution/oscam-1.20_svn$(OSCAM_REV)-sh4-linux:sbin/oscamd" \
 	  -e "apps/$(IPERF)/src/.libs/iperf3:bin/iperf3" \
 	  $(foreach f,$(IPERF_LIB_FILES), -e "apps/$(IPERF)/src/.libs/$(f):lib/$(f)") \
-		-e "apps/unicable/dsqsend/senddsq:sbin/senddsq"
+		-e "apps/unicable/dsqsend/senddsq:sbin/senddsq" \
+		-e "apps/dvb-apps/lib/libdvbapi/libdvbapi.so:usr/lib/libdvbapi.so" \
+		-e "apps/dvb-apps/util/femon/femon:usr/bin/femon"
 
 .PHONY: fs-list
 fs-list:
@@ -556,6 +564,24 @@ senddsq: apps/unicable/dsqsend/senddsq
 
 tools/axehelper: tools/axehelper.c
 	$(TOOLCHAIN)/bin/sh4-linux-gcc -o tools/axehelper -Wall -lrt tools/axehelper.c
+
+
+#
+# dvb-apps
+#
+apps/dvb-apps/util/femon/Makefile:
+	$(call HG_CLONE,http://linuxtv.org/hg/dvb-apps,dvb-apps)
+
+apps/dvb-apps/lib/libdvbapi/libdvbapi.so: apps/dvb-apps/util/femon/Makefile
+	CC=$(TOOLCHAIN)/bin/sh4-linux-gcc \
+		make -C apps/dvb-apps/lib/libdvbapi -j $(CPUS)
+
+apps/dvb-apps/util/femon/femon: apps/dvb-apps/lib/libdvbapi/libdvbapi.so
+	CC=$(TOOLCHAIN)/bin/sh4-linux-gcc \
+		make -C apps/dvb-apps/util/femon -j $(CPUS)
+
+.PHONY: dvb-apps
+dvb-apps: apps/dvb-apps/util/femon/femon
 
 #
 # clean all
