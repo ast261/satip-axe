@@ -22,9 +22,12 @@ mkdir -p /etc/sysconfig/minisatip
 
 cd /tmp
 while test ! -f /tmp/nosatip; do
+  # wait for network
   while ! test -r /tmp/satip-network; do
     nc -l 127.0.0.1:999 -e /etc/init.d/satip-network
   done
+  # wait for time for 10 seconds max
+  timeout -t 10 nc -l 127.0.0.1:998 -e /bin/true
   MINISATIP_PROGRAM=minisatip
   . /etc/sysconfig/config
   if test "$MINISATIP" = "yes"; then
