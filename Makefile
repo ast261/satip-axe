@@ -1,4 +1,4 @@
-BUILD=24-rc1
+BUILD=24-rc2
 VERSION=$(shell date +%Y%m%d%H%M)-$(BUILD)
 CPUS=$(shell nproc)
 CURDIR=$(shell pwd)
@@ -33,7 +33,7 @@ LIBDVBCSA_COMMIT=bc6c0b164a87ce05e9925785cc6fb3f54c02b026 # latest at the time
 LIBDVBCSA=libdvbcsa-master
 LIBDVBCSA_LIB_FILES=libdvbcsa.so libdvbcsa.so.1 libdvbcsa.so.1.0.1
 
-MINISATIP_COMMIT=v1.2.47
+MINISATIP_COMMIT=v1.2.12
 
 BUSYBOX=busybox-1.26.2
 
@@ -77,6 +77,9 @@ IPERF=iperf-3.1.3
 IPERF_LIB_FILES=libiperf.so libiperf.so.0 libiperf.so.0.0.0
 
 SENDDSQ_COMMIT=6129ccfa3c6e708077a1a527985fe46ecc59e660
+
+BINUTILS=binutils-2.39
+BINUTILS_BIN_FILES=addr2line
 
 define GIT_CLONE
 	@mkdir -p apps
@@ -134,6 +137,7 @@ CPIO_SRCS += nano
 CPIO_SRCS += mtd-utils
 CPIO_SRCS += iperf
 CPIO_SRCS += senddsq
+CPIO_SRCS += binutils
 
 fs.cpio: $(CPIO_SRCS)
 	fakeroot tools/do_min_fs.py \
@@ -163,7 +167,8 @@ fs.cpio: $(CPIO_SRCS)
 	  -e "apps/oscam-svn/Distribution/oscam-1.20_svn$(OSCAM_REV)-sh4-linux:sbin/oscamd" \
 	  -e "apps/$(IPERF)/src/.libs/iperf3:bin/iperf3" \
 	  $(foreach f,$(IPERF_LIB_FILES), -e "apps/$(IPERF)/src/.libs/$(f):lib/$(f)") \
-		-e "apps/unicable/dsqsend/senddsq:sbin/senddsq"
+	  -e "apps/unicable/dsqsend/senddsq:sbin/senddsq" \
+	  $(foreach f,$(BINUTILS_BIN_FILES), -e "apps/$(BINUTILS)/binutils/$(f):usr/bin/$(f)")
 
 .PHONY: fs-list
 fs-list:
@@ -526,11 +531,38 @@ apps/$(NFSUTILS)/utils/exportfs/exportfs: apps/$(RPCBIND)/rpcbind apps/$(NFSUTIL
 nfsutils: apps/$(NFSUTILS)/utils/exportfs/exportfs
 
 #
+# binutils (mainly for addr2line)
+#
+apps/$(BINUTILS)/binutils/configure:
+	$(call WGET,https://ftp.gnu.org/gnu/binutils/$(BINUTILS).tar.gz,apps/$(BINUTILS).tar.gz)
+	tar -C apps -xf apps/$(BINUTILS).tar.gz
+
+# disable as much as possible during configuring, since we only really want one binary...
+apps/$(BINUTILS)/binutils/addr2line: apps/$(BINUTILS)/binutils/configure
+	cd apps/$(BINUTILS) && \
+		AR=$(TOOLCHAIN)/bin/sh4-linux-ar \
+		CC=$(TOOLCHAIN)/bin/sh4-linux-gcc \
+		CFLAGS="-O2" \
+	./configure \
+		--host=sh4-linux \
+		--prefix=/ \
+		--disable-gold \
+		--disable-ld \
+		--disable-gprofng \
+		--disable-libquadmath \
+		--disable-libada \
+		--disable-libssp
+	make -C apps/$(BINUTILS) -j $(CPUS)
+
+.PHONY: binutils
+binutils: apps/$(BINUTILS)/binutils/addr2line
+
+#
 # oscam
 #
 
 apps/oscam-svn/config.sh:
-	cd apps && svn checkout http://www.streamboard.tv/svn/oscam/trunk oscam-svn -r $(OSCAM_REV)
+	cd apps && svn checkout https://svn.streamboard.tv/oscam/trunk/ oscam-svn -r $(OSCAM_REV)
 
 apps/oscam-svn/Distribution/oscam-1.20_svn$(OSCAM_REV)-sh4-linux: apps/oscam-svn/config.sh
 	make -C apps/oscam-svn -j $(CPUS) CROSS_DIR=$(TOOLCHAIN)/bin/ CROSS=sh4-linux-

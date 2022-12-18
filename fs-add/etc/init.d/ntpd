@@ -1,13 +1,23 @@
 #!/bin/sh
 
-while test ! -f /tmp/nontpd; do
-  NTPD_OPTS=""
-  test -r /etc/sysconfig/config && . /etc/sysconfig/config
-  test -z "$NTPD_OPTS" && NTPD_OPTS="-p 0.pool.ntp.org"
-  i=0
-  while test ! -f /etc/resolv.conf -a $i -le 100; do
-    sleep 0.2
-    i=$(expr $i + 1)
-  done
-  /usr/sbin/ntpd -n -I eth0 $NTPD_OPTS
+NTPD_OPTS=""
+test -r /etc/sysconfig/config && . /etc/sysconfig/config
+test -z "$NTPD_OPTS" && NTPD_OPTS="-p 0.pool.ntp.org"
+
+# wait for resolv.conf so we can resolve ntp servers
+i=0
+while test ! -f /etc/resolv.conf -a $i -le 100; do
+  sleep 0.2
+  i=$(expr $i + 1)
 done
+
+# sync once before daemonizing so we can notify minisatip startup that 
+# we have time
+/usr/sbin/ntpd -n -q -I eth0 $NTPD_OPTS
+logger -p local0.notice "ntpd time synchronized to $(date), signaling minisatip startup"
+
+# notify satip init script
+echo "ok" | nc 127.0.0.1 998 2> /dev/null
+
+# finally daemonize
+/usr/sbin/ntpd -I eth0 $NTPD_OPTS
