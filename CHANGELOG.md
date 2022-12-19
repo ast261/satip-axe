@@ -8,6 +8,7 @@ This change log will be updated whenever a new official release is made
 * Fix building OScam due to some changes in the SVN checkout URL
 * Rewrite ntpd startup script, fixes minisatip uptime display
 * Add `addr2line` utility so we can debug various crashes
+* Fix filesystem permissions which prevented `authorized_keys` from being used by Dropbear
 
 ## Build 23 (Oct 23 2022)
 * Upgrade `minisatip` to v1.2.38
