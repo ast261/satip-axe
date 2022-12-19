@@ -584,7 +584,7 @@ print '     ' + 30*'='  + '\n'
 gen_fs(library_list, boot_type)
 run_cmd('rm -v fs/etc/inittabBB fs/etc/init.d/rcSBB')
 for d in extradir_list:
-  run_cmd('cp -av ' + d + '/* fs')
+  run_cmd('cp -Rv ' + d + '/* fs')
 f = open("fs/etc/motd")
 b = f.read(1024*1024)
 f.close()
