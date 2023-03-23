@@ -562,7 +562,8 @@ binutils: apps/$(BINUTILS)/binutils/addr2line
 #
 
 apps/oscam-svn/config.sh:
-	cd apps && svn checkout https://svn.streamboard.tv/oscam/trunk/ oscam-svn -r $(OSCAM_REV)
+  # we cannot validate the server certificate because our OpenSSL and root certificates are too old
+	cd apps && echo 't' | svn checkout https://svn.streamboard.tv/oscam/trunk/ oscam-svn -r $(OSCAM_REV)
 
 apps/oscam-svn/Distribution/oscam-1.20_svn$(OSCAM_REV)-sh4-linux: apps/oscam-svn/config.sh
 	make -C apps/oscam-svn -j $(CPUS) CROSS_DIR=$(TOOLCHAIN)/bin/ CROSS=sh4-linux-
