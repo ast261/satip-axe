@@ -2,7 +2,7 @@
 
 This change log will be updated whenever a new official release is made
 
-## future release
+## Build 24 (Mar 23 2023)
 * Downgrade `minisatip` to v1.2.12
 * Add SFTP support to the SSH server for easier file editing and access
 * Fix building OScam due to some changes in the SVN checkout URL as well as the certificate used
