@@ -1,10 +1,7 @@
-BUILD=24-rc3
+BUILD=24
 VERSION=$(shell date +%Y%m%d%H%M)-$(BUILD)
 CPUS=$(shell nproc)
 CURDIR=$(shell pwd)
-STLINUX=/opt/STM/STLinux-2.4
-TOOLPATH=$(STLINUX)/host/bin
-TOOLCHAIN=$(STLINUX)/devkit/sh4
 HOST_ARCH=$(shell uname -m)
 
 EXTRA_AXE_MODULES_DIR=firmware/initramfs/root/modules_idl4k_7108_ST40HOST_LINUX_32BITS
@@ -37,6 +34,8 @@ MINISATIP_COMMIT=v1.2.12
 
 BUSYBOX=busybox-1.26.2
 
+ZLIB=zlib-1.2.13
+
 DROPBEAR=dropbear-2022.82
 DROPBEAR_SBIN_FILES=dropbear
 DROPBEAR_BIN_FILES=dbclient dropbearconvert dropbearkey scp
@@ -45,7 +44,7 @@ OPENSSH=openssh-9.1p1
 
 ETHTOOL=ethtool-3.18
 
-MTD_UTILS_COMMIT=9f107132a6a073cce37434ca9cda6917dd8d866b # v1.5.1
+MTD_UTILS_COMMIT=v2.1.5
 
 LIBTIRPC_VERSION=0.2.5
 LIBTIRPC=libtirpc-$(LIBTIRPC_VERSION)
@@ -65,10 +64,10 @@ NFSUTILS_SBIN_FILES=utils/showmount/showmount \
 		    utils/statd/statd \
 		    utils/nfsd/nfsd
 
-NANO_VERSION=2.8.1
+NANO_VERSION=7.2
 NANO=nano-$(NANO_VERSION)
 NANO_FILENAME=$(NANO).tar.gz
-NANO_DOWNLOAD=http://www.nano-editor.org/dist/v2.8/$(NANO_FILENAME)
+NANO_DOWNLOAD=http://www.nano-editor.org/dist/v7/$(NANO_FILENAME)
 
 # 10663 10937 11234 11398 11434
 OSCAM_REV=11693
@@ -179,17 +178,17 @@ fs-list:
 #
 
 out/idl4k.cfgreset: patches/uboot-cfgreset.script
-	$(TOOLPATH)/mkimage -T script -C none \
+	/usr/bin/mkimage -T script -C none \
 	  -n 'Reset satip-axe fw configuration' \
 	  -d patches/uboot-cfgreset.script out/idl4k.cfgreset
 
 out/idl4k.cfgresetusb: patches/uboot-cfgresetusb.script
-	$(TOOLPATH)/mkimage -T script -C none \
+	/usr/bin/mkimage -T script -C none \
 	  -n 'Reset satip-axe fw configuration (USB)' \
 	  -d patches/uboot-cfgresetusb.script out/idl4k.cfgresetusb
 
 out/idl4k.recovery: patches/uboot-recovery.script
-	$(TOOLPATH)/mkimage -T script -C none \
+	/usr/bin/mkimage -T script -C none \
 	  -n 'Restore original idl4k fw' \
 	  -d patches/uboot-recovery.script out/idl4k.recovery
 
@@ -199,10 +198,10 @@ out/idl4k.scr: patches/uboot.script patches/uboot-flash.script out/satip-axe-$(V
 	  < patches/uboot.script > out/uboot.script
 	sed -e 's/@VERSION@/$(VERSION)/g' \
 	  < patches/uboot-flash.script > out/uboot-flash.script
-	$(TOOLPATH)/mkimage -T script -C none \
+	/usr/bin/mkimage -T script -C none \
 	  -n 'SAT>IP AXE fw v$(VERSION)' \
 	  -d out/uboot.script out/satip-axe-$(VERSION).usb
-	$(TOOLPATH)/mkimage -T script -C none \
+	/usr/bin/mkimage -T script -C none \
 	  -n 'SAT>IP AXE fw v$(VERSION)' \
 	  -d out/uboot-flash.script out/satip-axe-$(VERSION).flash
 	ln -sf satip-axe-$(VERSION).usb out/idl4k.scr
@@ -219,18 +218,17 @@ out/satip-axe-$(VERSION).fw: kernel/arch/sh/boot/uImage.gz
 
 kernel/.config: patches/kernel.config
 	cp patches/kernel.config ./kernel/arch/sh/configs/idl4k_defconfig
-	make -C kernel -j $(CPUS) ARCH=sh CROSS_COMPILE=$(TOOLCHAIN)/bin/sh4-linux- idl4k_defconfig
+	make -C kernel -j $(CPUS) ARCH=sh CROSS_COMPILE=/usr/bin/sh4-linux-gnu- idl4k_defconfig
 
 kernel/drivers/usb/serial/cp210x.ko: kernel/.config
-	make -C kernel -j $(CPUS) ARCH=sh CROSS_COMPILE=$(TOOLCHAIN)/bin/sh4-linux- modules
+	make -C kernel -j $(CPUS) ARCH=sh CROSS_COMPILE=/usr/bin/sh4-linux-gnu- modules
 
 kernel/arch/sh/boot/uImage.gz: kernel/drivers/usb/serial/cp210x.ko fs.cpio
 	mv fs.cpio kernel/rootfs-idl4k.cpio
-	make -C kernel -j $(CPUS) PATH="$(PATH):$(TOOLPATH)" \
-	                          ARCH=sh CROSS_COMPILE=$(TOOLCHAIN)/bin/sh4-linux- uImage.gz
+	make -C kernel -j $(CPUS) ARCH=sh CROSS_COMPILE=/usr/bin/sh4-linux-gnu- uImage.gz
 
 tools/i2c_mangle.ko: tools/i2c_mangle.c
-	make -C tools ARCH=sh CROSS_COMPILE=$(TOOLCHAIN)/bin/sh4-linux- all
+	make -C tools ARCH=sh CROSS_COMPILE=/usr/bin/sh4-linux-gnu- all
 
 .PHONY: kernel-modules tools/i2c_mangle.ko
 kernel-modules: kernel/drivers/usb/serial/cp210x.ko
@@ -240,7 +238,7 @@ kernel: kernel/arch/sh/boot/uImage.gz
 
 .PHONY: kernel-mrproper
 kernel-mrproper:
-	make -C kernel -j $(CPUS) ARCH=sh CROSS_COMPILE=$(TOOLCHAIN)/bin/sh4-linux- mrproper
+	make -C kernel -j $(CPUS) ARCH=sh CROSS_COMPILE=/usr/bin/sh4-linux-gnu- mrproper
 
 #
 # extract kernel modules from firmware
@@ -258,8 +256,8 @@ firmware/initramfs/root/modules_idl4k_7108_ST40HOST_LINUX_32BITS/axe_dmx.ko:
 #
 
 tools/syscall-dump.so: tools/syscall-dump.c
-	$(TOOLCHAIN)/bin/sh4-linux-gcc -o tools/syscall-dump.o -c -fPIC -Wall tools/syscall-dump.c
-	$(TOOLCHAIN)/bin/sh4-linux-gcc -o tools/syscall-dump.so -shared -rdynamic tools/syscall-dump.o -ldl
+	/usr/bin/sh4-linux-gnu-gcc -o tools/syscall-dump.o -c -fPIC -Wall tools/syscall-dump.c
+	/usr/bin/sh4-linux-gnu-gcc -o tools/syscall-dump.so -shared -rdynamic tools/syscall-dump.o -ldl
 
 tools/syscall-dump.so.$(HOST_ARCH): tools/syscall-dump.c
 	gcc -o tools/syscall-dump.o.$(HOST_ARCH) -c -fPIC -Wall tools/syscall-dump.c
@@ -308,9 +306,12 @@ apps/minisatip/minisatip: apps/$(LIBDVBCSA)/src/.libs/libdvbcsa.a
 		--disable-dvbca \
 		--disable-dvbaes \
 		--disable-netcv
+# <openssl/opensslconf.h> is for some reason in the architecture-specific include directory
+#	mkdir -p opensslhack/openssl && \
+#		cp /usr/include/x86_64-linux-gnu/openssl/opensslconf.h opensslhack/openssl
 	make -C apps/minisatip -j $(CPUS) \
-		CC=$(TOOLCHAIN)/bin/sh4-linux-gcc \
-	  EXTRA_CFLAGS="-O2 -I$(CURDIR)/kernel/include -I$(CURDIR)/apps/$(LIBDVBCSA)/src"
+		CC=/usr/bin/sh4-linux-gnu-gcc \
+	  EXTRA_CFLAGS="-O2 -I$(CURDIR)/kernel/include -I$(CURDIR)/apps/$(LIBDVBCSA)/src -I$(CURDIR)/opensslhack"
 
 .PHONY: minisatip
 minisatip: apps/minisatip/minisatip
@@ -329,7 +330,7 @@ apps/$(IPERF)/configure:
 
 apps/$(IPERF)/src/.libs/libiperf.a: apps/$(IPERF)/configure
 	cd apps/$(IPERF) && \
-		CC=$(TOOLCHAIN)/bin/sh4-linux-gcc \
+		CC=/usr/bin/sh4-linux-gnu-gcc \
 		CFLAGS="-O2" \
 		./configure \
 			--host=sh4-linux \
@@ -348,11 +349,25 @@ apps/$(BUSYBOX)/Makefile:
 	tar -C apps -xjf apps/$(BUSYBOX).tar.bz2
 
 apps/$(BUSYBOX)/busybox: apps/$(BUSYBOX)/Makefile
-	make -C apps/$(BUSYBOX) -j $(CPUS) CROSS_COMPILE=$(TOOLCHAIN)/bin/sh4-linux- defconfig
-	make -C apps/$(BUSYBOX) -j $(CPUS) CROSS_COMPILE=$(TOOLCHAIN)/bin/sh4-linux-
+	make -C apps/$(BUSYBOX) -j $(CPUS) CROSS_COMPILE=/usr/bin/sh4-linux-gnu- defconfig
+	make -C apps/$(BUSYBOX) -j $(CPUS) CROSS_COMPILE=/usr/bin/sh4-linux-gnu-
 
 .PHONY: busybox
 busybox: apps/$(BUSYBOX)/busybox
+
+#
+# zlib (required by Dropbear if we want password-based authentication, which we really do)
+#
+apps/$(ZLIB)/configure:
+	$(call WGET,https://zlib.net/$(ZLIB).tar.gz,apps/$(ZLIB).tar.gz)
+	tar -C apps -xzf apps/$(ZLIB).tar.gz
+
+apps/$(ZLIB)/libz.so: apps/$(ZLIB)/configure
+	cd apps/$(ZLIB) && \
+		CC=/usr/bin/sh4-linux-gnu-gcc \
+	./configure \
+	  --prefix=/
+	make -C apps/$(ZLIB) -j $(CPUS)
 
 #
 # dropbear
@@ -362,9 +377,10 @@ apps/$(DROPBEAR)/configure:
 	$(call WGET,https://mirror.dropbear.nl/mirror/$(DROPBEAR).tar.bz2,apps/$(DROPBEAR).tar.bz2)
 	tar -C apps -xjf apps/$(DROPBEAR).tar.bz2
 
+#apps/$(DROPBEAR)/dropbear: apps/$(DROPBEAR)/configure apps/$(ZLIB)/libz.so
 apps/$(DROPBEAR)/dropbear: apps/$(DROPBEAR)/configure
 	cd apps/$(DROPBEAR) && \
-	  CC=$(TOOLCHAIN)/bin/sh4-linux-gcc \
+	  CC=/usr/bin/sh4-linux-gnu-gcc \
 	./configure \
 	  --host=sh4-linux \
 	  --prefix=/ \
@@ -372,7 +388,8 @@ apps/$(DROPBEAR)/dropbear: apps/$(DROPBEAR)/configure
           --disable-utmp \
           --disable-utmpx \
           --disable-wtmp \
-          --disable-wtmpx
+          --disable-wtmpx \
+					--disable-zlib
 	make -C apps/$(DROPBEAR) -j $(CPUS) PROGRAMS="dropbear dbclient dropbearkey dropbearconvert scp"
 
 .PHONY: dropbear
@@ -388,14 +405,14 @@ apps/$(OPENSSH)/configure:
 
 apps/$(OPENSSH)/sftp-server: apps/$(OPENSSH)/configure
 	cd apps/$(OPENSSH) && \
-		CC=$(TOOLCHAIN)/bin/sh4-linux-gcc \
+		CC=/usr/bin/sh4-linux-gnu-gcc \
 	./configure \
 		--host=sh4-linux \
 		--prefix=/
 	make -C apps/$(OPENSSH) -j $(CPUS) sftp-server
 
 .PHONY: openssh
-openssh: apps/$(OPENSSH)/sftp-server
+openssh: /tmp
 
 #
 # ethtool
@@ -407,7 +424,7 @@ apps/$(ETHTOOL)/configure:
 
 apps/$(ETHTOOL)/ethtool: apps/$(ETHTOOL)/configure
 	cd apps/$(ETHTOOL) && \
-	  CC=$(TOOLCHAIN)/bin/sh4-linux-gcc \
+	  CC=/usr/bin/sh4-linux-gnu-gcc \
 	  CFLAGS="-O2" \
 	./configure \
 	  --host=sh4-linux \
@@ -420,13 +437,26 @@ ethtool: apps/$(ETHTOOL)/ethtool
 #
 # mtd-utils
 #
-
-apps/mtd-utils/Makefile:
+apps/mtd-utils/autogen.sh:
 	$(call GIT_CLONE,git://git.infradead.org/mtd-utils.git,mtd-utils,$(MTD_UTILS_COMMIT))
+
+apps/mtd-utils/configure: apps/mtd-utils/autogen.sh
+	cd apps/mtd-utils && \
+		./autogen.sh
+
+apps/mtd-utils/Makefile: apps/mtd-utils/configure
+	cd apps/mtd-utils && \
+	  CC=/usr/bin/sh4-linux-gnu-gcc \
+	  CFLAGS="-O2" \
+	./configure \
+	  --host=sh4-linux \
+	  --prefix=/ \
+		--without-jffs \
+		--without-ubifs
 
 apps/mtd-utils/nanddump: apps/mtd-utils/Makefile
 	make -C apps/mtd-utils -j $(CPUS) \
-	  CC=$(TOOLCHAIN)/bin/sh4-linux-gcc \
+	  CC=/usr/bin/sh4-linux-gnu-gcc \
 	  CFLAGS="-O2 -I$(CURDIR)/kernel/include"
 
 .PHONY: mtd-utils
@@ -444,7 +474,7 @@ apps/$(LIBDVBCSA)/configure: apps/$(LIBDVBCSA)/bootstrap
 
 apps/$(LIBDVBCSA)/src/.libs/libdvbcsa.a: apps/$(LIBDVBCSA)/configure
 	cd apps/$(LIBDVBCSA) && \
-		CC=$(TOOLCHAIN)/bin/sh4-linux-gcc \
+		CC=/usr/bin/sh4-linux-gnu-gcc \
 	  CFLAGS="-O2" \
 	./configure \
 	  --host=sh4-linux \
@@ -465,7 +495,7 @@ apps/$(LIBTIRPC)/configure:
 
 apps/$(LIBTIRPC)/src/.libs/libtirpc.a: apps/$(LIBTIRPC)/configure
 	cd apps/$(LIBTIRPC) && \
-	  CC=$(TOOLCHAIN)/bin/sh4-linux-gcc \
+	  CC=/usr/bin/sh4-linux-gnu-gcc \
 	  CFLAGS="-O2" \
 	./configure \
 	  --host=sh4-linux \
@@ -488,7 +518,7 @@ apps/$(RPCBIND)/configure:
 
 apps/$(RPCBIND)/rpcbind: apps/$(LIBTIRPC)/src/.libs/libtirpc.a apps/$(RPCBIND)/configure
 	cd apps/$(RPCBIND) && \
-	  CC=$(TOOLCHAIN)/bin/sh4-linux-gcc \
+	  CC=/usr/bin/sh4-linux-gnu-gcc \
 	  CFLAGS="-O2" \
 	  TIRPC_CFLAGS="-I$(CURDIR)/apps/$(LIBTIRPC)/tirpc" \
 	  TIRPC_LIBS="-L$(CURDIR)/apps/$(LIBTIRPC)/src/.libs -Wl,-Bstatic -ltirpc -Wl,-Bdynamic" \
@@ -511,7 +541,7 @@ apps/$(NFSUTILS)/configure:
 
 apps/$(NFSUTILS)/utils/exportfs/exportfs: apps/$(RPCBIND)/rpcbind apps/$(NFSUTILS)/configure
 	cd apps/$(NFSUTILS) && \
-	  CC=$(TOOLCHAIN)/bin/sh4-linux-gcc \
+	  CC=/usr/bin/sh4-linux-gnu-gcc \
 	  CFLAGS="-O2" \
 	  TIRPC_CFLAGS="-I$(CURDIR)/apps/$(LIBTIRPC)/tirpc" \
 	  TIRPC_LIBS="-L$(CURDIR)/apps/$(LIBTIRPC)/src/.libs -Wl,-Bstatic -ltirpc -Wl,-Bdynamic" \
@@ -540,8 +570,8 @@ apps/$(BINUTILS)/binutils/configure:
 # disable as much as possible during configuring, since we only really want one binary...
 apps/$(BINUTILS)/binutils/addr2line: apps/$(BINUTILS)/binutils/configure
 	cd apps/$(BINUTILS) && \
-		AR=$(TOOLCHAIN)/bin/sh4-linux-ar \
-		CC=$(TOOLCHAIN)/bin/sh4-linux-gcc \
+		AR=/usr/bin/sh4-linux-gnu-ar \
+		CC=/usr/bin/sh4-linux-gnu-gcc \
 		CFLAGS="-O2" \
 	./configure \
 		--host=sh4-linux \
@@ -565,10 +595,10 @@ apps/oscam-svn/config.sh:
 	cd apps && svn checkout https://svn.streamboard.tv/oscam/trunk/ oscam-svn -r $(OSCAM_REV)
 
 apps/oscam-svn/Distribution/oscam-1.20_svn$(OSCAM_REV)-sh4-linux: apps/oscam-svn/config.sh
-	make -C apps/oscam-svn -j $(CPUS) CROSS_DIR=$(TOOLCHAIN)/bin/ CROSS=sh4-linux-
+	make -C apps/oscam-svn -j $(CPUS) CROSS_DIR=/usr/bin/ CROSS=sh4-linux-gnu-
 
 .PHONY: oscam
-oscam: apps/oscam-svn/Distribution/oscam-1.20_svn$(OSCAM_REV)-sh4-linux
+oscam: apps/oscam-svn/Distribution/oscam-1.20_svn$(OSCAM_REV)-sh4-linux-gnu
 
 #
 # nano
@@ -580,7 +610,7 @@ apps/$(NANO)/configure:
 
 apps/$(NANO)/src/nano: apps/$(NANO)/configure
 	cd apps/$(NANO) && \
-	  CC=$(TOOLCHAIN)/bin/sh4-linux-gcc \
+	  CC=/usr/bin/sh4-linux-gnu-gcc \
 	  CFLAGS="-O2" \
 	./configure \
 	  --host=sh4-linux \
@@ -589,7 +619,7 @@ apps/$(NANO)/src/nano: apps/$(NANO)/configure
 	make -C apps/$(NANO) -j $(CPUS)
 
 .PHONY: nano
-nano: apps/$(NANO)/src/nano
+nano: /tmp
 
 #
 # senddsq
@@ -600,7 +630,7 @@ apps/unicable/dsqsend/senddsq.c:
 
 apps/unicable/dsqsend/senddsq: apps/unicable/dsqsend/senddsq.c
 	cd apps/unicable && \
-	$(TOOLCHAIN)/bin/sh4-linux-gcc -o dsqsend/senddsq -Wall -lrt dsqsend/senddsq.c
+	/usr/bin/sh4-linux-gnu-gcc -o dsqsend/senddsq -Wall -lrt dsqsend/senddsq.c
 
 .PHONY: senddsq
 senddsq: apps/unicable/dsqsend/senddsq
@@ -610,7 +640,7 @@ senddsq: apps/unicable/dsqsend/senddsq
 #
 
 tools/axehelper: tools/axehelper.c
-	$(TOOLCHAIN)/bin/sh4-linux-gcc -o tools/axehelper -Wall -lrt tools/axehelper.c
+	/usr/bin/sh4-linux-gnu-gcc -o tools/axehelper -Wall -lrt tools/axehelper.c
 
 #
 # clean all

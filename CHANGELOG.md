@@ -3,7 +3,7 @@
 This change log will be updated whenever a new official release is made
 
 ## future release
-* Downgrade `minisatip` to v1.2.12
+* Upgrade `minisatip` to v1.2.49
 * Add SFTP support to the SSH server for easier file editing and access
 * Fix building OScam due to some changes in the SVN checkout URL
 * Rewrite ntpd startup script, fixes minisatip uptime display
