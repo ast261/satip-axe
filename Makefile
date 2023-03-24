@@ -324,8 +324,8 @@ minisatip-clean:
 #
 
 apps/$(IPERF)/configure:
-	$(call WGET,https://iperf.fr/download/source/$(IPERF)-source.tar.gz,apps/$(IPERF)-source.tar.gz)
-	tar -C apps -xf apps/$(IPERF)-source.tar.gz
+	$(call WGET,https://downloads.es.net/pub/iperf/$(IPERF).tar.gz,apps/$(IPERF).tar.gz)
+	tar -C apps -xf apps/$(IPERF).tar.gz
 
 apps/$(IPERF)/src/.libs/libiperf.a: apps/$(IPERF)/configure
 	cd apps/$(IPERF) && \
