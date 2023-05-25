@@ -37,11 +37,6 @@ IPV4="dhcp"
 #IPV4_GATEWAY="192.168.1.1"
 
 #
-# ntpd
-#
-NTPD_OPTS="-p 0.pool.ntp.org"
-
-#
 # syslogd
 #
 #SYSLOGD_OPTS="-R 192.168.1.1:514"
