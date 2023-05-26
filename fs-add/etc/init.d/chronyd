@@ -7,6 +7,10 @@ while test ! -f /etc/resolv.conf -a $i -le 100; do
   i=$(expr $i + 1)
 done
 
+# symlink persistent storage into /var/lib/chrony
+mkdir -p /etc/sysconfig/chrony
+ln -sf /etc/sysconfig/chrony /var/lib/chrony
+
 # sync once before daemonizing so we can notify minisatip startup that 
 # we have time
 chronyd -f /etc/chronyd.conf -n -q
