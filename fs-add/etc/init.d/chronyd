@@ -9,11 +9,11 @@ done
 
 # sync once before daemonizing so we can notify minisatip startup that 
 # we have time
-/usr/sbin/chronyd -f /etc/chronyd.conf -n -q
+chronyd -f /etc/chronyd.conf -n -q
 logger -p local0.notice "chronyd time synchronized to $(date), signaling minisatip startup"
 
 # notify satip init script
 echo "ok" | nc 127.0.0.1 998 2> /dev/null
 
 # finally daemonize
-/usr/sbin/chronyd -f /etc/chronyd.conf
+chronyd -f /etc/chronyd.conf
