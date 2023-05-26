@@ -372,8 +372,11 @@ apps/$(CHRONY)/Makefile: apps/$(CHRONY)/configure
 	cd apps/$(CHRONY) && \
 	  CC=$(TOOLCHAIN)/bin/sh4-linux-gcc \
 	./configure \
-	  --host=sh4-linux \
-	  --prefix=/
+	  --prefix=/ \
+	  --without-libcap \
+	  --enable-debug
+# Disable HAVE_RECVMMSG since the target system doesn't have it
+	sed -i "s/#define HAVE_RECVMMSG 1//g" apps/$(CHRONY)/config.h	
 
 apps/$(CHRONY)/chronyd: apps/$(CHRONY)/Makefile
 	make -C apps/$(CHRONY) -j $(CPUS)
