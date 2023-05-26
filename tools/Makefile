@@ -1,7 +1,7 @@
 obj-m=i2c_mangle.o
 
 all:
-	make -C $(PWD)/kernel ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) M=$(PWD)/tools modules
+	make -C ../kernel ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) M=$(shell pwd) modules
 
 clean:
-	make -C $(PWD)/kernel ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) M=$(PWD)/tools clean
+	make -C ../kernel ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) M=$(shell pwd) clean
