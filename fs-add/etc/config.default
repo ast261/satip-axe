@@ -83,8 +83,3 @@ NFSD_HOTPLUG_EXPORT="*" # replace with host or subnet, '*' = world
 # oscamd
 #
 OSCAMD="yes"
-
-#
-# custom daemon/service/setup executed from sysinit
-#
-#CUSTOMD="/etc/sysconfig/myboot"
