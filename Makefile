@@ -37,6 +37,9 @@ MINISATIP_COMMIT=v1.2.12
 
 BUSYBOX=busybox-1.26.2
 
+CHRONY=chrony-4.3
+CHRONY_SBIN_FILES=chronyd chronyc
+
 DROPBEAR=dropbear-2022.82
 DROPBEAR_SBIN_FILES=dropbear
 DROPBEAR_BIN_FILES=dbclient dropbearconvert dropbearkey scp
@@ -126,6 +129,7 @@ dist:
 
 CPIO_SRCS  = kernel-modules
 CPIO_SRCS += busybox
+CPIO_SRCS += chrony
 CPIO_SRCS += dropbear
 CPIO_SRCS += openssh
 CPIO_SRCS += ethtool
@@ -153,6 +157,7 @@ fs.cpio: $(CPIO_SRCS)
 	  $(foreach m,$(KMODULES), -e "kernel/$(m):lib/modules/$(m)") \
 	  -e "tools/axehelper:sbin/axehelper" \
 	  -e "apps/$(BUSYBOX)/busybox:bin/busybox" \
+	  $(foreach f,$(CHRONY_SBIN_FILES), -e "apps/$(CHRONY)/$(f):sbin/$(f)") \
 	  $(foreach f,$(DROPBEAR_SBIN_FILES), -e "apps/$(DROPBEAR)/$(f):sbin/$(f)") \
 	  $(foreach f,$(DROPBEAR_BIN_FILES), -e "apps/$(DROPBEAR)/$(f):usr/bin/$(f)") \
 	  -e "apps/$(OPENSSH)/sftp-server:usr/libexec/sftp-server" \
@@ -348,11 +353,36 @@ apps/$(BUSYBOX)/Makefile:
 	tar -C apps -xjf apps/$(BUSYBOX).tar.bz2
 
 apps/$(BUSYBOX)/busybox: apps/$(BUSYBOX)/Makefile
-	make -C apps/$(BUSYBOX) -j $(CPUS) CROSS_COMPILE=$(TOOLCHAIN)/bin/sh4-linux- defconfig
+	cp configs/busybox.config apps/$(BUSYBOX)/.config
 	make -C apps/$(BUSYBOX) -j $(CPUS) CROSS_COMPILE=$(TOOLCHAIN)/bin/sh4-linux-
 
 .PHONY: busybox
 busybox: apps/$(BUSYBOX)/busybox
+
+
+#
+# chrony
+#
+
+apps/$(CHRONY)/configure:
+	$(call WGET,https://download.tuxfamily.org/chrony/$(CHRONY).tar.gz,apps/$(CHRONY).tar.gz)
+	tar -C apps -xf apps/$(CHRONY).tar.gz
+
+apps/$(CHRONY)/Makefile: apps/$(CHRONY)/configure
+	cd apps/$(CHRONY) && \
+	  CC=$(TOOLCHAIN)/bin/sh4-linux-gcc \
+	./configure \
+	  --prefix=/ \
+	  --without-libcap \
+	  --enable-debug
+# Disable HAVE_RECVMMSG since the target system doesn't have it
+	sed -i "s/#define HAVE_RECVMMSG 1//g" apps/$(CHRONY)/config.h	
+
+apps/$(CHRONY)/chronyd: apps/$(CHRONY)/Makefile
+	make -C apps/$(CHRONY) -j $(CPUS)
+
+.PHONY: chrony
+chrony: apps/$(CHRONY)/chronyd
 
 #
 # dropbear

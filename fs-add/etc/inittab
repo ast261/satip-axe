@@ -5,7 +5,7 @@ ttyAS0::askfirst:/bin/sh
 # Network
 ::once:/etc/init.d/network
 # Time Network Protocol
-::once:/etc/init.d/ntpd
+::once:/etc/init.d/chronyd
 # NFSD
 ::once:/etc/init.d/nfsd
 # minisatip

@@ -1,9 +1,5 @@
 #!/bin/sh
 
-NTPD_OPTS=""
-test -r /etc/sysconfig/config && . /etc/sysconfig/config
-test -z "$NTPD_OPTS" && NTPD_OPTS="-p 0.pool.ntp.org"
-
 # wait for resolv.conf so we can resolve ntp servers
 i=0
 while test ! -f /etc/resolv.conf -a $i -le 100; do
@@ -11,13 +7,17 @@ while test ! -f /etc/resolv.conf -a $i -le 100; do
   i=$(expr $i + 1)
 done
 
+# symlink persistent storage into /var/lib/chrony
+mkdir -p /etc/sysconfig/chrony
+ln -sf /etc/sysconfig/chrony /var/lib/chrony
+
 # sync once before daemonizing so we can notify minisatip startup that 
 # we have time
-/usr/sbin/ntpd -n -q -I eth0 $NTPD_OPTS
-logger -p local0.notice "ntpd time synchronized to $(date), signaling minisatip startup"
+chronyd -f /etc/chronyd.conf -n -q
+logger -p local0.notice "chronyd time synchronized to $(date), signaling minisatip startup"
 
 # notify satip init script
 echo "ok" | nc 127.0.0.1 998 2> /dev/null
 
 # finally daemonize
-/usr/sbin/ntpd -I eth0 $NTPD_OPTS
+chronyd -f /etc/chronyd.conf
