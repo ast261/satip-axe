@@ -11,3 +11,4 @@ i2c_mangle.o
 i2c_mangle.ko
 Module.symvers
 modules.order
+.tmp_versions

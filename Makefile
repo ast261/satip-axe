@@ -237,8 +237,8 @@ kernel/arch/sh/boot/uImage.gz: kernel/drivers/usb/serial/cp210x.ko fs.cpio
 tools/i2c_mangle.ko: tools/i2c_mangle.c
 	make -C tools ARCH=sh CROSS_COMPILE=$(TOOLCHAIN)/bin/sh4-linux- all
 
-.PHONY: kernel-modules tools/i2c_mangle.ko
-kernel-modules: kernel/drivers/usb/serial/cp210x.ko
+.PHONY: kernel-modules
+kernel-modules: kernel/drivers/usb/serial/cp210x.ko tools/i2c_mangle.ko
 
 .PHONY: kernel
 kernel: kernel/arch/sh/boot/uImage.gz
