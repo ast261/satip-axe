@@ -237,7 +237,6 @@ def setup_sysvinit():
     run_cmd(' chmod a+x fs/lib/* ')
     run_cmd(' chmod a+x fs/usr/lib/* ')
     run_cmd('cp  -d ' + target_prefix + '/usr/lib/libwrap*' + ' fs/usr/lib/')
-    run_cmd('cp  -d ' + target_prefix + 'lib/libnsl*' + ' fs/usr/lib/')
 
 #------------------------------------------------
 

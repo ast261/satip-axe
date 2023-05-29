@@ -50,24 +50,6 @@ ETHTOOL=ethtool-3.18
 
 MTD_UTILS_COMMIT=9f107132a6a073cce37434ca9cda6917dd8d866b # v1.5.1
 
-LIBTIRPC_VERSION=0.2.5
-LIBTIRPC=libtirpc-$(LIBTIRPC_VERSION)
-
-RPCBIND_VERSION=0.2.3
-RPCBIND=rpcbind-$(RPCBIND_VERSION)
-RPCBIND_SBIN_FILES=rpcbind rpcinfo
-
-NFSUTILS_VERSION=1.3.4
-NFSUTILS=nfs-utils-$(NFSUTILS_VERSION)
-NFSUTILS_SBIN_FILES=utils/showmount/showmount \
-		    utils/exportfs/exportfs \
-		    utils/nfsstat/nfsstat \
-		    utils/mountd/mountd \
-		    utils/statd/start-statd \
-		    utils/statd/sm-notify \
-		    utils/statd/statd \
-		    utils/nfsd/nfsd
-
 NANO_VERSION=2.8.1
 NANO=nano-$(NANO_VERSION)
 NANO_FILENAME=$(NANO).tar.gz
@@ -136,7 +118,6 @@ CPIO_SRCS += ethtool
 CPIO_SRCS += minisatip
 CPIO_SRCS += oscam
 CPIO_SRCS += tools/axehelper
-CPIO_SRCS += nfsutils
 CPIO_SRCS += nano
 CPIO_SRCS += mtd-utils
 CPIO_SRCS += iperf
@@ -162,8 +143,6 @@ fs.cpio: $(CPIO_SRCS)
 	  $(foreach f,$(DROPBEAR_BIN_FILES), -e "apps/$(DROPBEAR)/$(f):usr/bin/$(f)") \
 	  -e "apps/$(OPENSSH)/sftp-server:usr/libexec/sftp-server" \
 	  -e "apps/$(ETHTOOL)/ethtool:sbin/ethtool" \
-	  $(foreach f,$(RPCBIND_SBIN_FILES), -e "apps/$(RPCBIND)/$(f):usr/sbin/$(f)") \
-	  $(foreach f,$(NFSUTILS_SBIN_FILES), -e "apps/$(NFSUTILS)/$(f):usr/sbin/$(notdir $(f))") \
 	  $(foreach f,$(LIBDVBCSA_LIB_FILES), -e "apps/$(LIBDVBCSA)/src/.libs/$(f):lib/$(f)") \
 	  -e "apps/minisatip/minisatip:sbin/minisatip" \
 	  $(foreach f,$(notdir $(wildcard apps/minisatip/html/*)), -e "apps/minisatip/html/$f:usr/share/minisatip/html/$f") \
@@ -484,81 +463,6 @@ apps/$(LIBDVBCSA)/src/.libs/libdvbcsa.a: apps/$(LIBDVBCSA)/configure
 
 .PHONY: libdvbcsa
 libdvbcsa: apps/$(LIBDVBCSA)/src/.libs/libdvbcsa.a
-
-#
-# libtirpc
-#
-
-apps/$(LIBTIRPC)/configure:
-	$(call WGET,http://sourceforge.net/projects/libtirpc/files/libtirpc/$(LIBTIRPC_VERSION)/$(LIBTIRPC).tar.bz2,apps/$(LIBTIRPC).tar.bz2)
-	tar -C apps -xjf apps/$(LIBTIRPC).tar.bz2
-
-apps/$(LIBTIRPC)/src/.libs/libtirpc.a: apps/$(LIBTIRPC)/configure
-	cd apps/$(LIBTIRPC) && \
-	  CC=$(TOOLCHAIN)/bin/sh4-linux-gcc \
-	  CFLAGS="-O2" \
-	./configure \
-	  --host=sh4-linux \
-	  --prefix=/ \
-	  --disable-shared \
-	  --disable-gssapi \
-	  --disable-ipv6
-	make -C apps/$(LIBTIRPC) -j $(CPUS)
-
-.PHONY: libtirpc
-libtirpc: apps/$(LIBTIRPC)/src/.libs/libtirpc.a
-
-#
-# rpcbind
-#
-
-apps/$(RPCBIND)/configure:
-	$(call WGET,http://sourceforge.net/projects/rpcbind/files/rpcbind/$(RPCBIND_VERSION)/$(RPCBIND).tar.bz2,apps/$(RPCBIND).tar.bz2)
-	tar -C apps -xjf apps/$(RPCBIND).tar.bz2
-
-apps/$(RPCBIND)/rpcbind: apps/$(LIBTIRPC)/src/.libs/libtirpc.a apps/$(RPCBIND)/configure
-	cd apps/$(RPCBIND) && \
-	  CC=$(TOOLCHAIN)/bin/sh4-linux-gcc \
-	  CFLAGS="-O2" \
-	  TIRPC_CFLAGS="-I$(CURDIR)/apps/$(LIBTIRPC)/tirpc" \
-	  TIRPC_LIBS="-L$(CURDIR)/apps/$(LIBTIRPC)/src/.libs -Wl,-Bstatic -ltirpc -Wl,-Bdynamic" \
-	./configure \
-	  --host=sh4-linux \
-	  --prefix=/ \
-	  --with-systemdsystemunitdir=no
-	make -C apps/$(RPCBIND) -j $(CPUS)
-
-.PHONY: rpcbind
-rpcbind: apps/$(RPCBIND)/rpcbind
-
-#
-# nfs-utils
-#
-
-apps/$(NFSUTILS)/configure:
-	$(call WGET,http://sourceforge.net/projects/nfs/files/nfs-utils/$(NFSUTILS_VERSION)/$(NFSUTILS).tar.bz2,apps/$(NFSUTILS).tar.bz2)
-	tar -C apps -xjf apps/$(NFSUTILS).tar.bz2
-
-apps/$(NFSUTILS)/utils/exportfs/exportfs: apps/$(RPCBIND)/rpcbind apps/$(NFSUTILS)/configure
-	cd apps/$(NFSUTILS) && \
-	  CC=$(TOOLCHAIN)/bin/sh4-linux-gcc \
-	  CFLAGS="-O2" \
-	  TIRPC_CFLAGS="-I$(CURDIR)/apps/$(LIBTIRPC)/tirpc" \
-	  TIRPC_LIBS="-L$(CURDIR)/apps/$(LIBTIRPC)/src/.libs -Wl,-Bstatic -ltirpc -Wl,-Bdynamic" \
-	./configure \
-	  --host=sh4-linux \
-	  --prefix=/ \
-	  --disable-mount \
-	  --disable-nfsdcltrack \
-	  --disable-nfsv4 \
-	  --disable-gss \
-	  --disable-ipv6 \
-	  --disable-uuid \
-	  --without-tcp-wrappers
-	make -C apps/$(NFSUTILS) -j $(CPUS)
-
-.PHONY: nfsutils
-nfsutils: apps/$(NFSUTILS)/utils/exportfs/exportfs
 
 #
 # binutils (mainly for addr2line)

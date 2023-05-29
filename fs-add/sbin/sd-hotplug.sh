@@ -21,12 +21,7 @@ for fs_type in vfat msdos ext4 ext3 ext2 ; do
     *) opts= ;;
     esac
     if $(mount -t $fs_type $opts /dev/$MDEV "$MOUNT_POINT" 2>/dev/null) ; then
-        nfs=
-	if test "$NFSD" = "yes" -a -n "$NFSD_HOTPLUG_EXPORT"; then
-	  exportfs -o rw,nohide,insecure,no_subtree_check "$NFSD_HOTPLUG_EXPORT":"$MOUNT_POINT"
-	  nfs=" (nfsd exported)"
-	fi
-	logger -p local0.notice "... $MDEV mounted using $fs_type filesystem${nfs}"
+        logger -p local0.notice "... $MDEV mounted using $fs_type filesystem"
         exit 0
     fi
 done
@@ -40,11 +35,8 @@ logger -p local0.notice "Unmounting $MDEV"
 for MOUNT_POINT in /media/* ; do
   if test -d "$MOUNT_POINT"; then
     d=$(mountpoint -n "$MOUNT_POINT" 2> /dev/null | cut -d ' ' -f 1)
-    if test "$d" = "$MDEV" -o "$d" = "/dev/$MDEV" -o "$d" = "UNKNOWN"; then
+    if test "$d" = "$MDEV" -o "$d" = "UNKNOWN"; then
       logger -p local0.notice "Unmounting $MDEV : $MOUNT_POINT"
-      if test "$NFSD" = "yes" -a -n "$NFSD_HOTPLUG_EXPORT"; then
-        exportfs -u "$NFSD_HOTPLUG_EXPORT":"$MOUNT_POINT"
-      fi
       umount -f "$MOUNT_POINT"
       rmdir "$MOUNT_POINT"
     fi
@@ -52,8 +44,6 @@ for MOUNT_POINT in /media/* ; do
 done
 
 }
-
-. /etc/sysconfig/config
 
 case "$ACTION" in
 add) add ;;
