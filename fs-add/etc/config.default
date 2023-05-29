@@ -71,8 +71,3 @@ CROND="yes"
 # oscamd
 #
 OSCAMD="yes"
-
-#
-# custom daemon/service/setup executed from sysinit
-#
-#CUSTOMD="/etc/sysconfig/myboot"
