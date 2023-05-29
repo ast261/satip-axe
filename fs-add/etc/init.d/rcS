@@ -148,21 +148,6 @@ fi
 ifconfig eth0 txqueuelen 2000 up
 route add -net 224.0.0.0 netmask 240.0.0.0 dev eth0
 
-# run extra services
-inithup=
-for prg in /etc/init.extra/*; do
-  if test -x "$prg"; then
-    if test -z "$inithup"; then
-      echo "# Added by /etc/init.d/rcS - init.extra" >> /etc/inittab
-    fi
-    echo "::respawn:${prg}" >> /etc/inittab
-    inithup=1
-  fi
-done
-if test -n "$inithup"; then
-  kill -SIGHUP 1
-fi
-
 # local boot
 if test -x /etc/sysconfig/localboot ; then
   /etc/sysconfig/localboot
