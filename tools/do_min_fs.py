@@ -177,68 +177,6 @@ def setup_busybox():
     run_cmd('mknod fs/dev/null c 1 3')
     run_cmd('mknod fs/dev/zero c 1 5')
 
-#-----------------------------------------------
-
-def setup_sysvinit():
-    print 'setup_sysvinit target_prefix ' + str(target_prefix)
-    bin = ['/usr/bin/passwd', '/bin/egrep']
-    for j in bin:
-        run_cmd('cp  ' + target_prefix + j + ' fs' + j)
-
-    # link sh --> bash
-    run_cmd(' cd fs/bin; ln -s  bash  sh')
-
-#    run_cmd('cp -a ' + target_prefix + '/etc/inittab' + ' fs/etc/')
-#    run_cmd('cp -a ' + target_prefix + '/etc/inittabBB' + ' fs/etc/')
-#    run_cmd('cp -a ' + target_prefix + '/etc/login.access' + ' fs/etc/')
-#    run_cmd('cp -a ' + target_prefix + '/etc/login.defs' + ' fs/etc/')
-    run_cmd('cp -a ' + target_prefix + '/etc/fstab' + ' fs/etc/')
-    run_cmd('cp -a ' + target_prefix + '/etc/passwd' + ' fs/etc/')
-    run_cmd('cp -r ' + target_prefix + '/etc/mtab' + ' fs/etc/')
-    run_cmd('mkdir -p fs/etc/default')
-    run_cmd('cp -r ' + target_prefix + '/etc/default/*' + ' fs/etc/default')
-
-    run_cmd('mkdir -p fs/etc/init.d')
-    # copy the full init.d
-    #run_cmd('cp -r ' + target_prefix + '/etc/init.d/' + ' fs/etc/')
-
-    # dnsmasq console-screen.sh messagebus hwclock.sh rdisc ifupdown procps.sh
-    # device-mapper nfs-kernel-server nfs-common
-    init_files = ['bootlogd', 'syslogd', 'bootmisc.sh', 'rcSBB', 'umountfs', \
-    'checkfs.sh',  'klogd',  'ntpdate',  'umountnfs.sh', \
-    'checkroot.sh', 'makedev',  'nviboot', 'rmnologin', 'urandom', \
-    'portmap', 'sendsigs', 'mountall.sh', 'setserial', 'mountnfs.sh', 'rc', \
-    'single', 'hostname.sh', 'rcS', 'syslog', 'bootclean.sh', 'mountvirtfs']
-    for i in init_files:
-        run_cmd('cp -r ' + target_prefix + '/etc/init.d/' + i + ' fs/etc/init.d/')
-
-    run_cmd('mkdir -p fs/etc/rc.d/rc0.d')
-    run_cmd('mkdir -p fs/etc/rc.d/rc1.d')
-    run_cmd('mkdir -p fs/etc/rc.d/rc2.d')
-    run_cmd('mkdir -p fs/etc/rc.d/rc3.d')
-    run_cmd('mkdir -p fs/etc/rc.d/rc4.d')
-    run_cmd('mkdir -p fs/etc/rc.d/rc5.d')
-    run_cmd('mkdir -p fs/etc/rc.d/rc6.d')
-    run_cmd('mkdir -p fs/etc/rc.d/rcS.d')
-    run_cmd('cp -dr ' + target_prefix + '/etc/rc.d/rc0.d/* ' + ' fs/etc/rc.d/rc0.d')
-    run_cmd('cp -r ' + target_prefix + '/etc/rc.d/rc1.d/* ' + ' fs/etc/rc.d/rc1.d')
-    run_cmd('cp -r ' + target_prefix + '/etc/rc.d/rc2.d/* ' + ' fs/etc/rc.d/rc2.d')
-    run_cmd('cp -r ' + target_prefix + '/etc/rc.d/rc3.d/* ' + ' fs/etc/rc.d/rc3.d')
-    run_cmd('cp -r ' + target_prefix + '/etc/rc.d/rc4.d/* ' + ' fs/etc/rc.d/rc4.d')
-    run_cmd('cp -r ' + target_prefix + '/etc/rc.d/rc5.d/* ' + ' fs/etc/rc.d/rc5.d')
-    run_cmd('cp -r ' + target_prefix + '/etc/rc.d/rc6.d/* ' + ' fs/etc/rc.d/rc6.d')
-    run_cmd('cp -r ' + target_prefix + '/etc/rc.d/rcS.d/* ' + ' fs/etc/rc.d/rcS.d')
-    run_cmd('cp -r ' + target_prefix + '/etc/rc.d/init.d '  + ' fs/etc/rc.d/')
-
-    # link init.d  rc.d
-    #cmd = ' cd fs/etc/rc.d/; ln -s  ../init.d  init.d'
-    #get_cmd_output(cmd)
-
-    run_cmd(' chmod a+x fs/lib/* ')
-    run_cmd(' chmod a+x fs/usr/lib/* ')
-    run_cmd('cp  -d ' + target_prefix + '/usr/lib/libwrap*' + ' fs/usr/lib/')
-    run_cmd('cp  -d ' + target_prefix + 'lib/libnsl*' + ' fs/usr/lib/')
-
 #------------------------------------------------
 
 def gen_fs(lib_list, init_type):
@@ -316,8 +254,6 @@ def gen_fs(lib_list, init_type):
 
     if init_type == 'busybox':
        setup_busybox()
-    if init_type == 'sysv':
-       setup_sysvinit()
 
 #------------------------------------------------
 
@@ -536,19 +472,8 @@ os.environ['LDD_ROOT_BASE'] = target_prefix
 line=[]
 raw_library_list=[]
 
-#  minimal command set, for bash.
-#  killall5 poweroff shutdown telinit
-bin_4_bash = ['bash', 'login', 'init', 'grep', 'uname', 'hostname', 'readlink', 'cat',\
-'mount', 'getty', 'agetty', 'stty', 'ls', 'rm', 'pwd', 'mountpoint', 'id', 'fsck',\
-'mknod', 'halt', 'chmod', 'runlevel']
-
 # setup libs for bash
 if boot_type != 'no':
-   if boot_type == 'sysv':
-      for i in bin_4_bash:
-          line = get_library(i)
-          for k in line:
-              raw_library_list.append(k)
    if boot_type == 'busybox':
       line = get_library('busybox')
       for j in line:

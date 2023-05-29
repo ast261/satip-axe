@@ -6,8 +6,6 @@ ttyAS0::askfirst:/bin/sh
 ::once:/etc/init.d/network
 # Time Network Protocol
 ::once:/etc/init.d/chronyd
-# NFSD
-::once:/etc/init.d/nfsd
 # minisatip
 ::once:/etc/init.d/satip
 # telnetd
@@ -20,8 +18,6 @@ ttyAS0::askfirst:/bin/sh
 ::once:/etc/init.d/crond
 # oscamd
 ::once:/etc/init.d/oscamd
-# custom service
-::once:/etc/init.d/customd
 # Others
 ::ctrlaltdel:/sbin/reboot
 ::shutdown:/sbin/swapoff -a

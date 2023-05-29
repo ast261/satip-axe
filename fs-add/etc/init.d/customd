@@ -1,7 +1,0 @@
-#!/bin/sh
-
-test -r /etc/sysconfig/config && . /etc/sysconfig/config
-
-if test -x "${CUSTOMD}" ; then
-  . "${CUSTOMD}"
-fi
