@@ -8,7 +8,7 @@ AXECFG=${AXECFG:7:255}
 
 # remount root filesystem in rw mode
 busybox mount -o remount,rw /
-# Create all symbolic links. 
+# Create all symbolic links.
 /bin/busybox --install -s
 
 # Date
@@ -33,7 +33,7 @@ mv /var /var.2
 mkdir /tmp/var
 ln -s /tmp/var /var
 rm -rf /var.2
-mkdir -p /tmp/var/run /tmp/var/log /tmp/var/spool
+mkdir -p /tmp/var/run /tmp/var/log /tmp/var/spool /tmp/var/lib
 
 # sysctl.conf
 sysctl -q -p
