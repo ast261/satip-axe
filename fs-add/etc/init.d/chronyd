@@ -11,7 +11,13 @@ done
 mkdir -p /etc/sysconfig/chrony
 ln -sf /etc/sysconfig/chrony /var/lib/chrony
 
-# sync once before daemonizing so we can notify minisatip startup that 
+# use custom config if exists
+if test -r /etc/sysconfig/chronyd.conf; then
+  rm /etc/chronyd.conf
+  ln -s /etc/sysconfig/chronyd.conf /etc/chronyd.conf
+fi
+
+# sync once before daemonizing so we can notify minisatip startup that
 # we have time
 chronyd -f /etc/chronyd.conf -n -q
 logger -p local0.notice "chronyd time synchronized to $(date), signaling minisatip startup"
