@@ -1,4 +1,4 @@
-BUILD=25-rc3
+BUILD=25
 VERSION=$(shell date +%Y%m%d%H%M)-$(BUILD)
 CPUS=$(shell nproc)
 CURDIR=$(shell pwd)
