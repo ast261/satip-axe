@@ -7,6 +7,11 @@ This change log will be updated whenever a new official release is made
 * Fix missing `i2c_mangle` kernel module
 * Make the build leaner by removing NFS and "customd" startup script support
 
+## Build 25 (Aug 6 2023)
+* Replace `ntpd` with `chronyd`, seems more stable and resilient to network changes (thanks @crycode-de)
+* Fix missing `i2c_mangle` kernel module
+* Make the build leaner by removing NFS and "customd" startup script support
+
 ## Build 24 (Mar 23 2023)
 * Downgrade `minisatip` to v1.2.12
 * Add SFTP support to the SSH server for easier file editing and access
