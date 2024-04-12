@@ -304,7 +304,6 @@ apps/minisatip/minisatip: apps/$(LIBDVBCSA)/src/.libs/libdvbcsa.a
 		--enable-dvbapi \
 		--enable-dvbcsa \
 		--disable-dvbca \
-		--disable-dvbaes \
 		--disable-netcv
 	make -C apps/minisatip -j $(CPUS) \
 		CC=$(TOOLCHAIN)/bin/sh4-linux-gcc \
