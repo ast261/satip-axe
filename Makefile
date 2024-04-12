@@ -55,8 +55,7 @@ NANO=nano-$(NANO_VERSION)
 NANO_FILENAME=$(NANO).tar.gz
 NANO_DOWNLOAD=http://www.nano-editor.org/dist/v2.8/$(NANO_FILENAME)
 
-# 10663 10937 11234 11398 11434
-OSCAM_REV=11693
+OSCAM_COMMIT=e1d2fb78 # r11763
 
 IPERF=iperf-3.1.3
 IPERF_LIB_FILES=libiperf.so libiperf.so.0 libiperf.so.0.0.0
@@ -148,7 +147,7 @@ fs.cpio: $(CPIO_SRCS)
 	  $(foreach f,$(notdir $(wildcard apps/minisatip/html/*)), -e "apps/minisatip/html/$f:usr/share/minisatip/html/$f") \
 	  -e "apps/$(NANO)/src/nano:usr/bin/nano" \
 	  -e "apps/mtd-utils/nandwrite:usr/sbin/nandwrite2" \
-	  -e "apps/oscam-svn/Distribution/oscam-1.20_svn$(OSCAM_REV)-sh4-linux:sbin/oscamd" \
+	  -e "apps/oscam/oscam:sbin/oscamd" \
 	  -e "apps/$(IPERF)/src/.libs/iperf3:bin/iperf3" \
 	  $(foreach f,$(IPERF_LIB_FILES), -e "apps/$(IPERF)/src/.libs/$(f):lib/$(f)") \
 	  -e "apps/unicable/dsqsend/senddsq:sbin/senddsq" \
@@ -494,15 +493,14 @@ binutils: apps/$(BINUTILS)/binutils/addr2line
 # oscam
 #
 
-apps/oscam-svn/config.sh:
-  # we cannot validate the server certificate because our OpenSSL and root certificates are too old
-	cd apps && echo 't' | svn checkout https://svn.streamboard.tv/oscam/trunk/ oscam-svn -r $(OSCAM_REV)
+apps/oscam/config.sh:
+	$(call GIT_CLONE,https://git.streamboard.tv/common/oscam.git,oscam,$(OSCAM_COMMIT))
 
-apps/oscam-svn/Distribution/oscam-1.20_svn$(OSCAM_REV)-sh4-linux: apps/oscam-svn/config.sh
-	make -C apps/oscam-svn -j $(CPUS) CROSS_DIR=$(TOOLCHAIN)/bin/ CROSS=sh4-linux-
+apps/oscam/oscam: apps/oscam/config.sh
+	make -C apps/oscam -j $(CPUS) CROSS_DIR=$(TOOLCHAIN)/bin/ CROSS=sh4-linux- OSCAM_BIN=oscam
 
 .PHONY: oscam
-oscam: apps/oscam-svn/Distribution/oscam-1.20_svn$(OSCAM_REV)-sh4-linux
+oscam: apps/oscam/oscam
 
 #
 # nano
