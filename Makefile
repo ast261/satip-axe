@@ -37,7 +37,7 @@ MINISATIP_COMMIT=v1.2.12
 
 BUSYBOX=busybox-1.26.2
 
-CHRONY=chrony-4.3
+CHRONY=chrony-4.5
 CHRONY_SBIN_FILES=chronyd chronyc
 
 DROPBEAR=dropbear-2022.82
