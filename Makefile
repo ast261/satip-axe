@@ -367,7 +367,7 @@ chrony: apps/$(CHRONY)/chronyd
 #
 
 apps/$(DROPBEAR)/configure:
-	$(call WGET,https://mirror.dropbear.nl/mirror/$(DROPBEAR).tar.bz2,apps/$(DROPBEAR).tar.bz2)
+	$(call WGET,https://matt.ucc.asn.au/dropbear/releases/$(DROPBEAR).tar.bz2,apps/$(DROPBEAR).tar.bz2)
 	tar -C apps -xjf apps/$(DROPBEAR).tar.bz2
 
 apps/$(DROPBEAR)/dropbear: apps/$(DROPBEAR)/configure
