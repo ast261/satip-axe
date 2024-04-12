@@ -343,7 +343,7 @@ busybox: apps/$(BUSYBOX)/busybox
 #
 
 apps/$(CHRONY)/configure:
-	$(call WGET,https://download.tuxfamily.org/chrony/$(CHRONY).tar.gz,apps/$(CHRONY).tar.gz)
+	$(call WGET,https://chrony-project.org/releases/$(CHRONY).tar.gz,apps/$(CHRONY).tar.gz)
 	tar -C apps -xf apps/$(CHRONY).tar.gz
 
 apps/$(CHRONY)/Makefile: apps/$(CHRONY)/configure
