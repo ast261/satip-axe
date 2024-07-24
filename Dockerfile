@@ -2,6 +2,9 @@ FROM jalle19/centos7-stlinux24
 
 WORKDIR /build
 
+# Use CERN mirror, everything official has been shut down long ago
+COPY ./configs/docker/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo
+
 RUN yum -y update && \
   yum -y install epel-release && \
   yum -y install wget make gcc git python wget tar \
