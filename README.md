@@ -35,6 +35,16 @@ There are two ways to flash new firmware to your device:
 * using the `upgrade-fw` script. Download the `.fw` file you want to flash to your device, then run `upgrade-fw path/to/file.fw`. The script only works for updating installations made to the device's flash memory - if dual-booting from a 
 USB device you should not use it.
 
+## Securing your installation
+
+By default, the `root` password is `satip`. To harden the installation you should 
+disable the password and use SSH keys to access the device.
+
+1. Create the file `/etc/sysconfig/authorized_keys` containing your SSH public key
+2. Reboot the device and verify that you can SSH into it without entering a password
+3. Copy `/etc/passwd` to `/etc/sysconfig/passwd` and modify the password entry for `root` to be `*`. This disables the password completely.
+4. Reboot once more. Now your device can only be accessed using SSH keys.
+
 ## More information
 
 For general information, see [upstream's README](https://github.com/perexg/satip-axe#readme), [upstream's dist/README](https://github.com/perexg/satip-axe/blob/master/dist/README) and [upstream's debug/README](https://github.com/perexg/satip-axe/blob/master/debug/README.md)
