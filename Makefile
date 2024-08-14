@@ -33,7 +33,7 @@ LIBDVBCSA_COMMIT=2e69227b2dba26d14589acdfc9a4667ec01a9383 # latest at the time
 LIBDVBCSA=libdvbcsa-master
 LIBDVBCSA_LIB_FILES=libdvbcsa.so libdvbcsa.so.1 libdvbcsa.so.1.0.1
 
-MINISATIP_COMMIT=v1.2.12
+MINISATIP_COMMIT=v1.3.11
 
 BUSYBOX=busybox-1.26.2
 
