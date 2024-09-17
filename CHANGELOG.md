@@ -2,10 +2,14 @@
 
 This change log will be updated whenever a new official release is made
 
-## future release
-* Replace `ntpd` with `chronyd`, seems more stable and resilient to network changes
-* Fix missing `i2c_mangle` kernel module
-* Make the build leaner by removing NFS and "customd" startup script support
+## Build 26 (Sep 16 2024)
+* Remove unrecognized `--disable-dvbaes` option when building minisatip
+* Bump `chrony` to 4.5
+* Update Dropbear download URL
+* Build `oscam` from git, bump to equivalent of r11763 (`e1d2fb78`)
+* Modify yum repository base URLs to point to CERN's mirror
+* Document how to harden an installation
+* Bump `minisatip` to v1.3.11
 
 ## Build 25 (Aug 6 2023)
 * Replace `ntpd` with `chronyd`, seems more stable and resilient to network changes (thanks @crycode-de)
