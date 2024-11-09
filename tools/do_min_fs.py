@@ -71,6 +71,16 @@ def gen_fs(init_type):
 
     run_cmd('cp -r -d ' + target_prefix + '/lib/*' + ' fs/lib/')
 
+    run_cmd('cp  -d ' + target_prefix + '/usr/lib/libz.so*' + ' fs/usr/lib/')
+    run_cmd('cp  -d ' + target_prefix + '/usr/lib/libstdc++.so*' + ' fs/usr/lib/')
+    run_cmd('cp  -d ' + target_prefix + '/usr/lib/libglib-2.0.so*' + ' fs/usr/lib/')
+    run_cmd('cp  -d ' + target_prefix + '/lib/libnsl*' + ' fs/usr/lib/')
+    run_cmd('cp  -d ' + target_prefix + '/usr/lib/libmagic.so*' + ' fs/usr/lib/')
+    run_cmd('cp  -d ' + target_prefix + '/usr/lib/libssl.so*' + ' fs/usr/lib/')
+    run_cmd('cp  -d ' + target_prefix + '/usr/lib/libcrypto.so*' + ' fs/usr/lib/')
+
+    run_cmd('cp  -d ' + target_prefix + '/usr/bin/gdbserver' + ' fs/usr/bin/')
+
     #cmd = 'cp -r ' + target_prefix + '/etc/rc.d/' + ' fs/etc/'
     #print cmd
     #run_cmd(cmd)
@@ -165,7 +175,7 @@ def get_menu_opt(argv):
 #os.environ['LDD_ROOT_SHOW'] = '0'
 
 global target_prefix
-target_prefix = '/usr/sh4-linux-gnu'
+target_prefix = '/opt/STM/STLinux-2.4/devkit/sh4/target'
 boot_type = 'busybox' # default
 user_param = ['', '', '']
 user_param = get_menu_opt(sys.argv[1:])
