@@ -513,6 +513,7 @@ apps/$(NANO)/src/nano: apps/$(NANO)/configure
 	cd apps/$(NANO) && \
 	  CC=$(TOOLCHAIN)/bin/sh4-linux-gcc \
 	  CFLAGS="-O2" \
+	  NCURSES_LIBS="-lncurses" \
 	./configure \
 	  --host=sh4-linux \
 	  --disable-utf8 \
