@@ -281,7 +281,7 @@ media-clean:
 apps/minisatip/minisatip: apps/$(LIBDVBCSA)/src/.libs/libdvbcsa.a
 	rm -rf apps/minisatip
 	$(call GIT_CLONE,https://github.com/catalinii/minisatip.git,minisatip,$(MINISATIP_COMMIT))
-	cd apps/minisatip && ./configure \
+	cd apps/minisatip && git apply ../../patches/minisatip-cross-compile.patch && ./configure \
 		CFLAGS="-I$(CURDIR)/apps/$(LIBDVBCSA)/src" \
 		LDFLAGS="-L$(CURDIR)/apps/$(LIBDVBCSA)/src/.libs" \
 		--enable-axe \
