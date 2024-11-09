@@ -1,0 +1,22 @@
+diff --git a/configure b/configure
+index 7c6c9d5..2fcc0c9 100755
+--- a/configure
++++ b/configure
+@@ -3659,8 +3659,6 @@ else
+ FM="$FM\n$axe disabled"
+ fi
+ 
+-ac_save_CFLAGS="$CFLAGS"
+-CFLAGS="$CFLAGS -fstrict-flex-arrays"
+ 
+ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+ /* end confdefs.h.  */
+@@ -3686,8 +3684,6 @@ then :
+   CFLAGS="$ac_save_CFLAGS"
+ fi
+ 
+-ac_save_CFLAGS="$CFLAGS"
+-CFLAGS="$CFLAGS -fsanitize=bounds -fsanitize-trap=all"
+ 
+ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+ /* end confdefs.h.  */
