@@ -209,7 +209,7 @@ kernel/drivers/usb/serial/cp210x.ko: toolchain/4.5.3-99/opt/STM/STLinux-2.4/devk
 
 kernel/arch/sh/boot/uImage.gz: kernel/drivers/usb/serial/cp210x.ko fs.cpio
 	mv fs.cpio kernel/rootfs-idl4k.cpio
-	make -C kernel -j ${CPUS} PATH="$(PATH):$(TOOLPATH)" \
+	make -C kernel -j $(CPUS) PATH="$(PATH):$(TOOLPATH)" \
 	                          ARCH=sh CROSS_COMPILE=$(TOOLCHAIN_KERNEL)/bin/sh4-linux- uImage.gz
 
 tools/i2c_mangle.ko: tools/i2c_mangle.c
@@ -223,11 +223,11 @@ kernel: kernel/arch/sh/boot/uImage.gz
 
 .PHONY: kernel-mrproper
 kernel-mrproper:
-	make -C kernel -j ${CPUS} ARCH=sh CROSS_COMPILE=$(TOOLCHAIN_KERNEL)/bin/sh4-linux- mrproper
+	make -C kernel -j $(CPUS) ARCH=sh CROSS_COMPILE=$(TOOLCHAIN_KERNEL)/bin/sh4-linux- mrproper
 
 define RPM_UNPACK
 	@mkdir -p $(1)
-	cd $(1) ; rpm2cpio ../$(2) | cpio -idv
+	cd $(1) ; bsdtar -xf ../$(2)
 endef
 
 toolchain/4.5.3-99/opt/STM/STLinux-2.4/devkit/sh4/bin/sh4-linux-gcc-4.5.3:
