@@ -80,6 +80,7 @@ def gen_fs(init_type):
     run_cmd('cp  -d ' + target_prefix + '/usr/lib/libcrypto.so*' + ' fs/usr/lib/')
 
     run_cmd('cp  -d ' + target_prefix + '/usr/bin/gdbserver' + ' fs/usr/bin/')
+    run_cmd('cp  -d ' + target_prefix + '/usr/bin/strace' + ' fs/usr/bin/')
 
     #cmd = 'cp -r ' + target_prefix + '/etc/rc.d/' + ' fs/etc/'
     #print cmd
