@@ -94,7 +94,7 @@ docker-clean-release:
 #
 
 .PHONY: all
-all: kernel-axe-modules kernel
+all: kernel-axe-modules kernel u-boot
 
 .PHONY: release
 release: kernel-axe-modules out/idl4k.scr out/idl4k.cfgreset out/idl4k.cfgresetusb out/idl4k.recovery
@@ -160,6 +160,15 @@ fs-list:
 #
 # uboot
 #
+u-boot/u-boot.bin:
+	make -C u-boot ARCH=sh CROSS_COMPILE=$(TOOLCHAIN_KERNEL)/bin/sh4-linux- idl4k_config
+	make -C u-boot -j $(CPUS) ARCH=sh CROSS_COMPILE=$(TOOLCHAIN_KERNEL)/bin/sh4-linux-
+
+u-boot-clean:
+	make -C u-boot ARCH=sh CROSS_COMPILE=$(TOOLCHAIN_KERNEL)/bin/sh4-linux- distclean
+
+u-boot: u-boot/u-boot.bin
+
 
 out/idl4k.cfgreset: patches/uboot-cfgreset.script
 	$(TOOLPATH)/mkimage -T script -C none \
