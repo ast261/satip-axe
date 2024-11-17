@@ -176,7 +176,7 @@ def get_menu_opt(argv):
 #os.environ['LDD_ROOT_SHOW'] = '0'
 
 global target_prefix
-target_prefix = '/opt/STM/STLinux-2.4/devkit/sh4/target'
+target_prefix = '/usr/sh4-linux-gnu'
 boot_type = 'busybox' # default
 user_param = ['', '', '']
 user_param = get_menu_opt(sys.argv[1:])
@@ -185,9 +185,9 @@ extradir_list = user_param[3]
 version = user_param[4]
 
 if user_param[0] != '':
-   boot_type = user_param[1] # default busybox
+   boot_type = user_param[0] # default busybox
 if user_param[1] != '':
-   target_prefix =  user_param[2]
+   target_prefix =  user_param[1]
 
 print(30*'=')
 print('  boot_type: ' + str(boot_type))
