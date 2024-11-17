@@ -2,9 +2,14 @@ BUILD=26
 VERSION=$(shell date +%Y%m%d%H%M)-$(BUILD)
 CPUS=$(shell nproc)
 CURDIR=$(shell pwd)
-STLINUX=/opt/STM/STLinux-2.4
-TOOLPATH=$(STLINUX)/host/bin
-TOOLCHAIN=$(STLINUX)/devkit/sh4
+SH4_TOOLCHAIN_VERSION=stable-2024.05-1
+TOOLPATH=$(CURDIR)/u-boot/tools
+TOOLCHAIN=$(CURDIR)/toolchain/sh-sh4--glibc--$(SH4_TOOLCHAIN_VERSION)
+SYSROOT=$(TOOLCHAIN)/sh4-buildroot-linux-gnu/sysroot
+TARGET=sh4-linux
+CROSS_COMPILE=$(TOOLCHAIN)/bin/$(TARGET)-
+CC=$(CROSS_COMPILE)gcc
+CONFIGURE_BASE="CC=$(CC) ./configure --host=$(TARGET) --prefix=$(SYSROOT)/usr"
 TOOLCHAIN_KERNEL=$(CURDIR)/toolchain/4.5.3-99/opt/STM/STLinux-2.4/devkit/sh4
 HOST_ARCH=$(shell uname -m)
 
@@ -243,6 +248,11 @@ toolchain/4.5.3-99/opt/STM/STLinux-2.4/devkit/sh4/bin/sh4-linux-gcc-4.5.3:
 	$(call RPM_UNPACK,toolchain/4.5.3-99,stlinux24-cross-sh4-binutils-2.24.51.0.3-76.i386.rpm)
 	$(call RPM_UNPACK,toolchain/4.5.3-99,stlinux24-cross-sh4-cpp-4.5.3-99.i386.rpm)
 	$(call RPM_UNPACK,toolchain/4.5.3-99,stlinux24-cross-sh4-gcc-4.5.3-99.i386.rpm)
+
+toolchain/sh-sh4--glibc--$(SH4_TOOLCHAIN_VERSION)/bin/sh4-linux-gcc:
+	wget https://toolchains.bootlin.com/downloads/releases/toolchains/sh-sh4/tarballs/sh-sh4--glibc--$(SH4_TOOLCHAIN_VERSION).tar.xz -O toolchain/sh-sh4--glibc--$(SH4_TOOLCHAIN_VERSION).tar.xz
+	tar -C toolchain -xf toolchain/sh-sh4--glibc--$(SH4_TOOLCHAIN_VERSION).tar.xz
+
 
 #
 # extract kernel modules from firmware
