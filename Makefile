@@ -41,7 +41,7 @@ LIBDVBCSA_LIB_FILES=libdvbcsa.so libdvbcsa.so.1 libdvbcsa.so.1.0.1
 
 MINISATIP_COMMIT=v1.3.11
 
-BUSYBOX=busybox-1.37.0
+BUSYBOX=busybox-1.26.2
 
 CHRONY=chrony-4.5
 CHRONY_SBIN_FILES=chronyd chronyc
@@ -99,7 +99,7 @@ docker-clean-release:
 #
 
 .PHONY: all
-all: kernel-axe-modules kernel u-boot toolchain/sh-sh4--glibc--$(SH4_TOOLCHAIN_VERSION)/bin/sh4-linux-gcc
+all: kernel-axe-modules kernel u-boot
 
 .PHONY: release
 release: kernel-axe-modules out/idl4k.scr out/idl4k.cfgreset out/idl4k.cfgresetusb out/idl4k.recovery
@@ -132,7 +132,6 @@ CPIO_SRCS += binutils
 fs.cpio: $(CPIO_SRCS)
 	fakeroot tools/do_min_fs.py \
 	  -r "$(VERSION)" \
-	  -t "$(SYSROOT)" \
 	  -d "fs-add" \
 	  $(foreach m,$(EXTRA_AXE_MODULES), -e "$(EXTRA_AXE_MODULES_DIR)/$(m):lib/modules/axe/$(m)") \
 	  -e "patches/axe_dmxts_std.ko:lib/modules/axe/axe_dmxts_std.ko" \
@@ -356,12 +355,12 @@ iperf: apps/$(IPERF)/src/.libs/libiperf.a
 #
 
 apps/$(BUSYBOX)/Makefile:
-	$(call WGET,https://busybox.net/downloads/$(BUSYBOX).tar.bz2,apps/$(BUSYBOX).tar.bz2)
+	$(call WGET,http://busybox.net/downloads/$(BUSYBOX).tar.bz2,apps/$(BUSYBOX).tar.bz2)
 	tar -C apps -xjf apps/$(BUSYBOX).tar.bz2
 
 apps/$(BUSYBOX)/busybox: apps/$(BUSYBOX)/Makefile
 	cp configs/busybox.config apps/$(BUSYBOX)/.config
-	make -C apps/$(BUSYBOX) -j $(CPUS) CROSS_COMPILE=$(CROSS_COMPILE)
+	make -C apps/$(BUSYBOX) -j $(CPUS) CROSS_COMPILE=$(TOOLCHAIN)/bin/sh4-linux-
 
 .PHONY: busybox
 busybox: apps/$(BUSYBOX)/busybox
