@@ -29,7 +29,7 @@ KMODULES = drivers/usb/serial/cp210x.ko \
 	   drivers/usb/serial/ftdi_sio.ko \
 	   drivers/usb/serial/oti6858.ko
 
-LIBDVBCSA_COMMIT=bc6c0b164a87ce05e9925785cc6fb3f54c02b026 # latest at the time
+LIBDVBCSA_COMMIT=2e69227b2dba26d14589acdfc9a4667ec01a9383 # latest at the time
 LIBDVBCSA=libdvbcsa-master
 LIBDVBCSA_LIB_FILES=libdvbcsa.so libdvbcsa.so.1 libdvbcsa.so.1.0.1
 
@@ -442,7 +442,7 @@ mtd-utils: apps/mtd-utils/nanddump
 # libdvbcsa
 #
 apps/$(LIBDVBCSA)/bootstrap:
-	$(call GIT_CLONE,https://code.videolan.org/videolan/libdvbcsa.git,$(LIBDVBCSA),$(LIBDVBCSA_COMMIT))
+	$(call GIT_CLONE,https://github.com/catalinii/libdvbcsa.git,$(LIBDVBCSA),$(LIBDVBCSA_COMMIT))
 
 apps/$(LIBDVBCSA)/configure: apps/$(LIBDVBCSA)/bootstrap
 	cd apps/$(LIBDVBCSA) && \
