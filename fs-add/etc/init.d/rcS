@@ -73,7 +73,7 @@ d=/lib/modules/axe
 insmod $d/stapi_core_stripped.ko
 insmod $d/stapi_ioctl_stripped.ko
 insmod $d/axe_i2c.ko
-insmod $d/i2c_mangle.ko
+#insmod $d/i2c_mangle.ko
 insmod $d/axe_fe.ko
 insmod $d/axe_fp.ko
 insmod $d/axe_dmx.ko
