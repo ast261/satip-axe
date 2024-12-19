@@ -12,7 +12,7 @@ busybox mount -o remount,rw /
 /bin/busybox --install -s
 
 # Date
-date 010112002022 >/dev/null
+date 010112002024 >/dev/null
 
 # mount /dev and devpts to allow logging in
 mount -t tmpfs -o size=64k,mode=0755 tmpfs /dev
