@@ -61,7 +61,7 @@ DROPBEAR="yes"
 #
 MINISATIP="yes"
 #MINISATIP_OPTS="--dvbapi 127.0.0.1:9000"
-MINISATIP_OPTS="-p http://192.168.178.5/playlist.m3u"
+MINISATIP_OPTS="-p http://192.168.178.8/playlist.m3u"
 
 #
 # inetd (httpd,ftpd)
