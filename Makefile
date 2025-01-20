@@ -2,10 +2,11 @@ BUILD=26
 VERSION=$(shell date +%Y%m%d%H%M)-$(BUILD)
 CPUS=$(shell nproc)
 CURDIR=$(shell pwd)
-SH4_TOOLCHAIN_VERSION=stable-2024.05-1
+SH4_TOOLCHAIN_VERSION=10.2.0
 TOOLPATH=$(CURDIR)/u-boot/tools
-TOOLCHAIN=$(CURDIR)/toolchain/sh-sh4--glibc--$(SH4_TOOLCHAIN_VERSION)
-SYSROOT=$(TOOLCHAIN)/sh4-buildroot-linux-gnu/sysroot
+TOOLCHAIN=$(CURDIR)/toolchain/sh4-gcc-$(SH4_TOOLCHAIN_VERSION)
+#LD_LIBRARY_PATH=$(TOOLCHAIN)/lib
+SYSROOT=$(TOOLCHAIN)/sh4-idl4k-linux-gnu/sysroot
 TARGET=sh4-linux
 CROSS_COMPILE=$(TOOLCHAIN)/bin/$(TARGET)-
 CC=$(CROSS_COMPILE)gcc
@@ -41,7 +42,7 @@ LIBDVBCSA_LIB_FILES=libdvbcsa.so libdvbcsa.so.1 libdvbcsa.so.1.0.1
 
 MINISATIP_COMMIT=v1.3.11
 
-BUSYBOX=busybox-1.26.2
+BUSYBOX=busybox-1.37.0
 
 CHRONY=chrony-4.5
 CHRONY_SBIN_FILES=chronyd chronyc
@@ -99,7 +100,7 @@ docker-clean-release:
 #
 
 .PHONY: all
-all: kernel-axe-modules kernel u-boot
+all: kernel-axe-modules kernel u-boot toolchain/sh4-gcc-$(SH4_TOOLCHAIN_VERSION)/bin/sh4-linux-gcc
 
 .PHONY: release
 release: kernel-axe-modules out/idl4k.scr out/idl4k.cfgreset out/idl4k.cfgresetusb out/idl4k.recovery
@@ -132,6 +133,7 @@ CPIO_SRCS += binutils
 fs.cpio: $(CPIO_SRCS)
 	fakeroot tools/do_min_fs.py \
 	  -r "$(VERSION)" \
+	  -t "$(SYSROOT)" \
 	  -d "fs-add" \
 	  $(foreach m,$(EXTRA_AXE_MODULES), -e "$(EXTRA_AXE_MODULES_DIR)/$(m):lib/modules/axe/$(m)") \
 	  -e "patches/axe_dmxts_std.ko:lib/modules/axe/axe_dmxts_std.ko" \
@@ -249,10 +251,9 @@ toolchain/4.5.3-99/opt/STM/STLinux-2.4/devkit/sh4/bin/sh4-linux-gcc-4.5.3:
 	$(call RPM_UNPACK,toolchain/4.5.3-99,stlinux24-cross-sh4-cpp-4.5.3-99.i386.rpm)
 	$(call RPM_UNPACK,toolchain/4.5.3-99,stlinux24-cross-sh4-gcc-4.5.3-99.i386.rpm)
 
-toolchain/sh-sh4--glibc--$(SH4_TOOLCHAIN_VERSION)/bin/sh4-linux-gcc:
-	wget https://toolchains.bootlin.com/downloads/releases/toolchains/sh-sh4/tarballs/sh-sh4--glibc--$(SH4_TOOLCHAIN_VERSION).tar.xz -O toolchain/sh-sh4--glibc--$(SH4_TOOLCHAIN_VERSION).tar.xz
-	tar -C toolchain -xf toolchain/sh-sh4--glibc--$(SH4_TOOLCHAIN_VERSION).tar.xz
-
+toolchain/sh4-gcc-$(SH4_TOOLCHAIN_VERSION)/bin/sh4-linux-gcc:
+#	wget https://toolchains.bootlin.com/downloads/releases/toolchains/sh-sh4/tarballs/sh-sh4--glibc--$(SH4_TOOLCHAIN_VERSION).tar.xz -O toolchain/sh-sh4--glibc--$(SH4_TOOLCHAIN_VERSION).tar.xz
+	tar -C toolchain -xf toolchain/sh4-toolchain-gcc-$(SH4_TOOLCHAIN_VERSION).tar.xz
 
 #
 # extract kernel modules from firmware
@@ -355,12 +356,12 @@ iperf: apps/$(IPERF)/src/.libs/libiperf.a
 #
 
 apps/$(BUSYBOX)/Makefile:
-	$(call WGET,http://busybox.net/downloads/$(BUSYBOX).tar.bz2,apps/$(BUSYBOX).tar.bz2)
+	$(call WGET,https://busybox.net/downloads/$(BUSYBOX).tar.bz2,apps/$(BUSYBOX).tar.bz2)
 	tar -C apps -xjf apps/$(BUSYBOX).tar.bz2
 
 apps/$(BUSYBOX)/busybox: apps/$(BUSYBOX)/Makefile
 	cp configs/busybox.config apps/$(BUSYBOX)/.config
-	make -C apps/$(BUSYBOX) -j $(CPUS) CROSS_COMPILE=$(TOOLCHAIN)/bin/sh4-linux-
+	make -C apps/$(BUSYBOX) -j $(CPUS) CROSS_COMPILE=$(CROSS_COMPILE)
 
 .PHONY: busybox
 busybox: apps/$(BUSYBOX)/busybox
