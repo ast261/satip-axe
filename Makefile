@@ -2,10 +2,9 @@ BUILD=26
 VERSION=$(shell date +%Y%m%d%H%M)-$(BUILD)
 CPUS=$(shell nproc)
 CURDIR=$(shell pwd)
-SH4_TOOLCHAIN_VERSION=10.2.0
+SH4_TOOLCHAIN_VERSION=10.3.0
 TOOLPATH=$(CURDIR)/u-boot/tools
 TOOLCHAIN=$(CURDIR)/toolchain/sh4-gcc-$(SH4_TOOLCHAIN_VERSION)
-#LD_LIBRARY_PATH=$(TOOLCHAIN)/lib
 SYSROOT=$(TOOLCHAIN)/sh4-idl4k-linux-gnu/sysroot
 TARGET=sh4-linux
 CROSS_COMPILE=$(TOOLCHAIN)/bin/$(TARGET)-
@@ -24,6 +23,9 @@ EXTRA_AXE_LIBS=libboost_date_time.so libboost_date_time.so.1.53.0 \
                libboost_filesystem.so libboost_filesystem.so.1.53.0 \
                libboost_serialization.so libboost_serialization.so.1.53.0 \
                libboost_system.so libboost_system.so.1.53.0
+EXTRA_AXE_LIBS_DIR2=firmware/initramfs/usr/lib
+EXTRA_AXE_LIBS2=libglib-2.0.so libglib-2.0.so.0 libglib-2.0.so.0.3200.1 \
+		libelf-0.152.so libelf.so libelf.so.1
 
 ORIG_FILES=main_axe.out
 
@@ -54,8 +56,6 @@ DROPBEAR_BIN_FILES=dbclient dropbearconvert dropbearkey scp
 OPENSSH=openssh-9.1p1
 
 ETHTOOL=ethtool-3.18
-
-MTD_UTILS_COMMIT=9f107132a6a073cce37434ca9cda6917dd8d866b # v1.5.1
 
 NANO_VERSION=2.8.1
 NANO=nano-$(NANO_VERSION)
@@ -100,7 +100,7 @@ docker-clean-release:
 #
 
 .PHONY: all
-all: kernel-axe-modules kernel u-boot toolchain/sh4-gcc-$(SH4_TOOLCHAIN_VERSION)/bin/sh4-linux-gcc
+all: kernel-axe-modules kernel u-boot
 
 .PHONY: release
 release: kernel-axe-modules out/idl4k.scr out/idl4k.cfgreset out/idl4k.cfgresetusb out/idl4k.recovery
@@ -125,7 +125,6 @@ CPIO_SRCS += minisatip
 CPIO_SRCS += oscam
 CPIO_SRCS += tools/axehelper
 CPIO_SRCS += nano
-CPIO_SRCS += mtd-utils
 CPIO_SRCS += iperf
 CPIO_SRCS += senddsq
 CPIO_SRCS += binutils
@@ -140,6 +139,7 @@ fs.cpio: $(CPIO_SRCS)
 	  -e "patches/axe_fe_157.ko:lib/modules/axe/axe_fe.ko" \
 	  $(foreach m,$(ORIG_FILES), -e "$(EXTRA_AXE_MODULES_DIR)/../$(m):lib/modules/axe/$(m)") \
 	  $(foreach m,$(EXTRA_AXE_LIBS), -e "$(EXTRA_AXE_LIBS_DIR)/$(m):lib/$(m)") \
+	  $(foreach m,$(EXTRA_AXE_LIBS2), -e "$(EXTRA_AXE_LIBS_DIR2)/$(m):lib/$(m)") \
 	  -e "tools/i2c_mangle.ko:lib/modules/axe/i2c_mangle.ko" \
 	  $(foreach m,$(KMODULES), -e "kernel/$(m):lib/modules/$(m)") \
 	  -e "tools/axehelper:sbin/axehelper" \
@@ -253,8 +253,8 @@ toolchain/4.5.3-99/opt/STM/STLinux-2.4/devkit/sh4/bin/sh4-linux-gcc-4.5.3:
 
 toolchain/sh4-gcc-$(SH4_TOOLCHAIN_VERSION)/bin/sh4-linux-gcc:
 #	wget https://toolchains.bootlin.com/downloads/releases/toolchains/sh-sh4/tarballs/sh-sh4--glibc--$(SH4_TOOLCHAIN_VERSION).tar.xz -O toolchain/sh-sh4--glibc--$(SH4_TOOLCHAIN_VERSION).tar.xz
-	tar -C toolchain -xf toolchain/sh4-toolchain-gcc-$(SH4_TOOLCHAIN_VERSION).tar.xz
-
+	tar -C toolchain -xf toolchain/sh4-idl4k-linux-gnu_sdk-buildroot-gcc-$(SH4_TOOLCHAIN_VERSION).tar.gz
+	toolchain/sh4-gcc-$(SH4_TOOLCHAIN_VERSION)/relocate-sdk.sh
 #
 # extract kernel modules from firmware
 #
@@ -364,7 +364,7 @@ apps/$(BUSYBOX)/busybox: apps/$(BUSYBOX)/Makefile
 	make -C apps/$(BUSYBOX) -j $(CPUS) CROSS_COMPILE=$(CROSS_COMPILE)
 
 .PHONY: busybox
-busybox: apps/$(BUSYBOX)/busybox
+busybox: toolchain/sh4-gcc-$(SH4_TOOLCHAIN_VERSION)/bin/sh4-linux-gcc apps/$(BUSYBOX)/busybox
 
 
 #
@@ -454,20 +454,6 @@ apps/$(ETHTOOL)/ethtool: apps/$(ETHTOOL)/configure
 .PHONY: ethtool
 ethtool: apps/$(ETHTOOL)/ethtool
 
-#
-# mtd-utils
-#
-
-apps/mtd-utils/Makefile:
-	$(call GIT_CLONE,git://git.infradead.org/mtd-utils.git,mtd-utils,$(MTD_UTILS_COMMIT))
-
-apps/mtd-utils/nanddump: apps/mtd-utils/Makefile
-	make -C apps/mtd-utils -j $(CPUS) \
-	  CC=$(TOOLCHAIN)/bin/sh4-linux-gcc \
-	  CFLAGS="-O2 -I$(CURDIR)/kernel/include"
-
-.PHONY: mtd-utils
-mtd-utils: apps/mtd-utils/nanddump
 
 #
 # libdvbcsa
